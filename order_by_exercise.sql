@@ -6,7 +6,7 @@ show databases;
 use employees;
 show tables;
 ;
-
+/*
 -- Find all current or previous employees with first names 'Irena', 'Vidya', or 'Maya' using IN. What is the employee number of the top three results?
 -- 10200, 10397 and 10610
 select *
@@ -21,6 +21,7 @@ limit 3
 select *
 from employees
 where first_name = 'Irena' OR first_name = 'Vidya' OR first_name = 'Maya'
+
 limit 3
 ;
 -- Find all current or previous employees with first names 'Irena', 'Vidya', or 'Maya', using OR, and who is (male). 
@@ -82,6 +83,7 @@ select *
 from employees
 where last_name LIKE '%Q%' AND last_name NOT LIKE '%qu%'
 ;
+*/
 -- Find all employees with first names 'Irena', 'Vidya', or 'Maya', and order your results returned by first name.
 select *
 from employees
@@ -125,7 +127,7 @@ ORDER BY last_name, first_name
 		-- 499648, Tadahiro Erde
 select *
 from employees
-where last_name LIKE 'e%' AND last_name LIKE '%e'
+where last_name LIKE 'e%e'
 ORDER BY emp_no
 ;
 
@@ -136,10 +138,10 @@ ORDER BY emp_no
 -- the name of the newest employee,
 		-- Teiji Eldridge
 -- and the name of the oldest employee.
-		-- Menkae Etalle
+		-- Sergi Erde
 select *
 from employees
-where last_name LIKE 'e%' AND last_name LIKE '%e'
+where last_name LIKE 'e%e'
 ORDER BY hire_date desc
 ;
 -- Find all employees hired in the 90s and born on Christmas. 
@@ -147,12 +149,12 @@ ORDER BY hire_date desc
 -- Enter a comment with the number of employees returned,
 	-- employes returned 362
 -- the name of the oldest employee who was hired last,
-	-- Gudjon Vakili
+	-- Douadi Pettis
 -- and the name of the youngest employee who was hired first.
-	-- Tremaine Eugenio
+	-- Khun Bemini
 select *
 from employees
 where hire_date BETWEEN '1990-01-01' AND '1999-12-31'
 	AND (birth_date LIKE '%12-25')
-order by birth_date desc, hire_date desc
+order by birth_date, hire_date desc
 ;
