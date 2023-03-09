@@ -15,14 +15,15 @@ CREATE TABLE `albums` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1
 */
+
 -- What is the primary key for the albums table?
--- 'id'
+-- 'PRIMARY KEY (`id`)
 
 -- What does the column named 'name' represent?
--- a string
+-- album title
 
 -- What do you think the sales column represents?
--- Decimail numbers
+-- number of sales of units or money
 
 -- Find the name of all albums by Pink Floyd.
 -- The Dark Side of the wall and The wall
@@ -39,21 +40,19 @@ where name = "Sgt. Pepper's Lonely Hearts Club Band"
 
 -- What is the genre for the album Nevermind?
 -- Grunge, Alternative rock
-select *
+select genre
 from albums
 where name = 'Nevermind'
 ;
 
 -- Which albums were released in the 1990s?
--- The Immaculate Collection
-select *
+select name, release_date
 from albums
-where release_date = 1990
+where release_date between 1990 and 1999
 ;
 
 -- Which albums had less than 20 million certified sales?
--- id - 9, 11, 15, 17, 19, 21, 22, 23-26, and 28-29
-select *
+select name, sales
 from albums
 where sales < 20
 ;
