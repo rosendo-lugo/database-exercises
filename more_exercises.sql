@@ -68,6 +68,9 @@ where category_id > 4 AND (name LIKE 'C%'
     OR name LIKE 'T%')
 ;
 -- Select all columns minus the password column from the staff table for rows that contain a password.
+select * -- staff_id, first_name, last_name, address_id, picture, email, store_id, active, username, last_update
+from staff
+;
 -- Select all columns minus the password column from the staff table for rows that do not contain a password.
 -- IN operator
 
@@ -88,3 +91,5 @@ where category_id > 4 AND (name LIKE 'C%'
 -- Select all columns from the payment table and only include the first 20 rows.
 -- Select the payment date and amount columns from the payment table for rows where the payment amount is greater than 5, and only select rows whose zero-based index in the result set is between 1000-2000.
 -- Select all columns from the customer table, limiting results to those where the zero-based index is between 101-200.
+
+

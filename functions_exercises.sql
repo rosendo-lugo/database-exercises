@@ -232,7 +232,7 @@ from employees
 ;
 
 
-select first_name, last_name, birth_date, hire_date
+select distinct first_name, last_name, birth_date, hire_date
 			, concat(LOWER( LEFT(first_name, 1))
 				, LOWER( left( last_name, 4))
                 , date_format(birth_date, '_%m%y')) AS username
