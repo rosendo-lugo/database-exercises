@@ -78,6 +78,7 @@ from employees
 -- Bonus: More practice with aggregate functions:
 -- Determine the historic average salary for each employee. 
 -- When you hear, read, or think ****"FOR EACH"**** with regard to SQL, you'll probably be grouping by that exact column.
+use employees;
 select emp_no, avg()
 from salaries
 group by emp_no
