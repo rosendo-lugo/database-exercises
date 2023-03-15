@@ -101,6 +101,7 @@ where t.to_date > curdate()
 ;
 
 -- correct --
+SELECT * FROM employees.titles;
 select *
 from employees
 where first_name = 'Aamod'
@@ -245,29 +246,103 @@ where e.emp_no NOT IN (
 		)
 ;
 -- #4 Find all the current department managers that are female. List their names in a comment in your code.
--- p1 v1
+-- v1
+-- subquery
+use employees;
+
 select *
 from dept_manager dm
+where dm.to_date > curdate()
 ;
+-- Query
 select first_name
 	, last_name
     , gender
+    , d.dept_name
 from employees e
-where gender = 'F'
+join dept_emp de using(emp_no)
+join departments d using(dept_no)
+where gender = 'F' AND emp_no =
+		(
+		select dm.dept_no
+		from dept_manager dm
+		where dm.to_date > curdate()
+		)
 ;
 
-select dept_name
+-- v2
+-- Subquery -- this subquery returns an error "Subquery returns more than 1 row"
+-- it returns 1000 rows
+select e.emp_no, gender
+from employees e
+where e.gender = 'F' 
+;
+-- (Query) v2
+select * from departments;
+select * from dept_manager;
+select * from dept_emp;
+select * from employees;
+
+select d.dept_name
+	, e.first_name
+    , e.last_name
+    , e.gender
 from employees e
 join dept_manager dm using(emp_no)
 join departments d using(dept_no)
-where dm.to_date > curdate() = 
-		(
-		select gender
-		from employees e
-		where gender = 'F'
-		)
-group by dept_name
+where dm.to_date > curdate() 
+	AND emp_no = 
+    (
+    select gender
+	from employees
+	where gender = 'F' 
+    )
 ;
+-- v3 Find all the current department managers that are female. List their names in a comment in your code.
+-- subquery -error: Error Code: 1242. Subquery returns more than 1 row
+select emp_no
+from dept_manager dm
+where dm.to_date > curdate()
+;
+-- Query
+select e.first_name
+from employees e
+join dept_manager dm using(emp_no)
+where e.gender = 'F' and emp_no = -- put IN and it will fix the problem. 
+	(
+    select emp_no
+	from dept_manager dm
+	where dm.to_date > curdate()
+    )
+;
+-- v4 Find all the current department managers that are female. List their names in a comment in your code.
+-- subquery -The following error can be avoided if you change the "=" for "IN": Error Code: 1242. Subquery returns more than 1 row
+select concat(e.first_name, ' ',e.last_name)
+from employees e
+join dept_manager dm using(emp_no)
+where gender = 'F' and dm.to_date > curdate()
+;
+-- Query
+select concat(e.first_name, ' ', e.last_name) as first_and_last_name
+from employees e
+where emp_no IN -- not sure why (IN vs =) doesn't give you an "Error Code: 1242. Subquery returns more than 1 row"
+		(
+		select dm.emp_no
+		from employees e
+		join dept_manager dm
+        ON dm.emp_no = e.emp_no
+		where gender = 'F' and dm.to_date > curdate()
+		)
+;
+
+
+
+
+
+
+
+
+
 -- correct --
 select *
 from dept_manager
@@ -284,7 +359,7 @@ where dm.to_date > curdate()
 	AND gender = 'F'
 ;
 
-select concat(e.last_name, ' ', e.first_name)
+select concat(e.last_name, ' ', e.first_name) as current_female_department_managers
 from employees e
 where e.emp_no IN
 	(
@@ -312,8 +387,9 @@ Legleitner Isamu'
 select avg(salary)
 from salaries
 ;
+
 select count(*) from(
-	concat(e.last_name, ' ', e.last_name) as EmpName
+	concat(e.last_name, ' ', e.last_name))as EmpName
 	, s.salary
 from employees e
 join salaries s 
@@ -324,7 +400,9 @@ where s.to_date > curdate()
     select avg(salary)
 	from salaries
     )
+)
 ;
+
 -- #6 How many current salaries are within 1 standard deviation of the current highest salary? (Hint: you can use a built in function to calculate the standard deviation.) What percentage of all salaries is this?
 
 
@@ -333,30 +411,38 @@ select max(salary)
 from salaries s
 where s.to_date > curdate()
 ;
-
+-- subquery
 select round(stddev(salary), 2)
 from salaries s
 where s.to_date > curdate()
 ;
 
-select max(salary) - round(stddev(salary), 2)
-from salaries s
-where s.to_date > curdate()
-;
-
-select count(*)
-from salaries
-where salary > (select max(salary) - round(stddev(salary), 2)
-from salaries s
-where s.to_date > curdate())
+-- Numerator; salaries 1 stddev from the max salary
+select count(*) from salaries 
+where salary >(select max(salary) - round(stddev(salary), 2)
+				from salaries s
+				where s.to_date > curdate())
 and to_date > curdate()
-
-/
-(select count(*)
-from salaries s
-where s.to_date > curdate()
-)* 100, 2) as pctmaxstd
 ;
+-- denamenator; total salary
+select count(*) from salaries 
+where  to_date > curdate()
+;
+
+select round(
+(-- Numerator; salaries 1 stddev from the max salary
+select count(*) from salaries 
+where salary >(select max(salary) - round(stddev(salary), 2)
+				from salaries s
+				where s.to_date > curdate())
+and to_date > curdate())
+/
+(-- denamenator; total salary
+select count(*) from salaries 
+where  to_date > curdate())*100, 2) as prctmaxstddev
+;
+
+
 -- Hint You will likely use multiple subqueries in a variety of ways
 -- Hint It's a good practice to write out all of the small queries that you can. Add a comment above the query showing the number of rows returned. You will use this number (or the query that produced it) in other, larger queries.
 
