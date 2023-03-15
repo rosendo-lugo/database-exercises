@@ -216,6 +216,7 @@ from orders
 ;
 
 -- find out how many times people ordered the different sizes
+use chipotle;
 select count(*), order_size -- can now use my count by category because of the groupby
 from 
 	(select id, quantity,

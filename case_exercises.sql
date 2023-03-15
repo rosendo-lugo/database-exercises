@@ -279,3 +279,16 @@ select *
 from  dept_emp
 limit 11
 ;
+
+-- Wilson's short method
+select emp_no
+	, dept_no
+    , hire_date
+    , to_date
+    , to_date > now() AS 'is_current_employee'
+from dept_emp
+join employees
+		using(emp_no)
+where (emp_no, to_date) IN 
+	(select emp_no, max(to_date) from dept_emp group by emp_no)
+    ;

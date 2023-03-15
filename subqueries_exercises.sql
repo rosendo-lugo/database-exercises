@@ -388,20 +388,23 @@ select avg(salary)
 from salaries
 ;
 
-select count(*) from(
-	concat(e.last_name, ' ', e.last_name))as EmpName
+select count(*) 
+from(
+	select concat(e.last_name, ' ', e.last_name))as EmpName
 	, s.salary
-from employees e
-join salaries s 
-	ON s.emp_no = e.emp_no
-where s.to_date > curdate()
-	and s.salary >
-    (
-    select avg(salary)
-	from salaries
+	from employees e
+	join salaries s 
+		ON s.emp_no = e.emp_no
+	where s.to_date > curdate()
+		and s.salary >
+		(
+		select avg(salary)
+		from salaries
     )
 )
 ;
+
+
 
 -- #6 How many current salaries are within 1 standard deviation of the current highest salary? (Hint: you can use a built in function to calculate the standard deviation.) What percentage of all salaries is this?
 
