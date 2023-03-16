@@ -20,6 +20,7 @@ select *,
 from dept_emp
 ;
 
+############################################################ Teacher's Correct ANS #########################################################################################################
 -- #1 **** Teacher's Correct ANS****
 select 
 	emp_no
@@ -68,6 +69,8 @@ from
 group by last_name
 order by last_name
 ;
+
+############################################################ Teacher's Correct ANS #########################################################################################################
 -- #2 **** Teacher's Correct ANS****
 select first_name, last_name,
 	case
@@ -88,6 +91,7 @@ select first_name
 from employees
 where left(first_name, 1) <= 'H'
 ;
+
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------
 -- #3 How many employees (current or previous) were born in each decade?
 select birth_date
@@ -130,6 +134,8 @@ group by decade_born_in
 ;
 -- total people born in 1950's #181,014 and 1960 #119,010 (not sure)
 
+
+############################################################ Teacher's Correct ANS #########################################################################################################
 -- #3 **** Teacher's Correct ANS****
 -- find out how many decades do we have
 select min(birth_date), max(birth_date)
@@ -146,9 +152,11 @@ group by birth_decade
 ;
 -- ANS 50's 182,886 and 60s 117,138
 
+
 -- --------------------------------------------------------------------------------------------------------------------------------------------------------
 -- #4 What is the current average salary for each of the following department groups: 
 	-- R&D, Sales & Marketing, Prod & QM, Finance & HR, Customer Service?
+use employees;
 select *
 from salaries
 ;
@@ -157,6 +165,9 @@ from departments
 ;
 select *
 from dept_emp
+;
+select *
+from employees
 ;
 
 select round(avg(salary),2) as Overall_Avg_Salary -- Overall average salary $63,810.74
@@ -191,13 +202,23 @@ from(
 	)
 ;
 -- Come back to this later
-select count(*),
-	CASE
-		WHEN THEN
-        ELSE
-	END AS
+	-- R&D, Sales & Marketing, Prod & QM, Finance & HR, Customer Service?
+select *
 from dept_emp
 ;
+
+
+select
+		CASE
+			WHEN dept_name IN ('Research', 'Development') then 'R&D'
+			WHEN dept_name IN ('Sales', 'Marketing') then 'Sales & Marketing'
+			WHEN dept_name IN ('Production', 'Quality Management') then 'Prod & QM'
+			WHEN dept_name IN ('Finance', 'Human Resources') then 'Finance & HR'
+            ELSE 'Customer Service'
+		END as new_dept_name
+from departments
+;
+
 
 -- RESTART
 -- #4 What is the current average salary for each of the following department groups: 
@@ -211,7 +232,18 @@ join salaries s using(emp_no)
 where de.to_date > curdate()
 ;
 
-select round(avg(salary),2)
+-- The CASE is in the worng location. This gives you the average salary for each departments with a new name.
+select round(avg(salary),2) as Avg_salary_per_dept,
+	(
+		select distinct
+				CASE
+					WHEN dept_name IN ('Research', 'Development') then 'R&D'
+					WHEN dept_name IN ('Sales', 'Marketing') then 'Sales & Marketing'
+					WHEN dept_name IN ('Production', 'Quality Management') then 'Prod & QM'
+					WHEN dept_name IN ('Finance', 'Human Resources') then 'Finance & HR'
+					ELSE 'Customer Service'
+				END as 'new_dept_name'
+	) as dept_group -- subquery
 from 
 	(
 		select de.emp_no, d.dept_name, s.salary
@@ -219,19 +251,203 @@ from
 		join departments d using(dept_no)
 		join salaries s using(emp_no)
 		where de.to_date > curdate()
+			AND s.to_date > curdate()
 	) as subq
-group by d.dept_name
+group by dept_name -- THE GROUPING HERE IS WRONG THE FIRST QUERY AND SECOND QUERY NEED TO MATCH GROUP BY
+; 
+-- v2 of the above problem going to try to move the CASE to a different location
+select round(avg(salary),2) as Avg_salary_per_dept,
+	(
+		SELECT 
+			CASE
+				WHEN dept_name IN ('Research', 'Development') then 'R&D'
+				WHEN dept_name IN ('Sales', 'Marketing') then 'Sales & Marketing'
+				WHEN dept_name IN ('Production', 'Quality Management') then 'Prod & QM'
+				WHEN dept_name IN ('Finance', 'Human Resources') then 'Finance & HR'
+				ELSE 'Customer Service'
+			END AS new_dept_name
+-- 			COUNT(*) AS employee_count
+-- 		FROM dept_emp 
+-- 		JOIN departments ON dept_emp.dept_no = departments.dept_no
+-- 		GROUP BY new_dept_name
+	) as GTP_version
+from 
+	(
+		select de.emp_no, d.dept_name, s.salary
+		from dept_emp de
+		join departments d using(dept_no)
+		join salaries s using(emp_no)
+		where de.to_date > curdate()
+			AND s.to_date > curdate()
+           --  AND 
+	) as subq
 ;
--- Teacher's Correct ANS ---------
+
+-- CHATGPT version ********THE NEX TWO VERSION ARE NOT CORRECT- THEY ARE JUST SHOWING THE COUNT BUT ARE WRONG******
+-- chatgpt is assuming that we are using some kind of dept_id to combine the table (I only gave partial informaton)
+SELECT 
+	CASE
+		WHEN dept_name IN ('Research', 'Development') then 'R&D'
+		WHEN dept_name IN ('Sales', 'Marketing') then 'Sales & Marketing'
+		WHEN dept_name IN ('Production', 'Quality Management') then 'Prod & QM'
+		WHEN dept_name IN ('Finance', 'Human Resources') then 'Finance & HR'
+		ELSE 'Customer Service'
+	END AS new_dept_name,
+	COUNT(*) AS employee_count
+FROM employees
+JOIN departments ON employees.dept_id = departments.dept_id
+GROUP BY new_dept_name;
+
+-- v2 this is only counting the employees not the salary
+SELECT 
+	CASE
+		WHEN dept_name IN ('Research', 'Development') then 'R&D'
+		WHEN dept_name IN ('Sales', 'Marketing') then 'Sales & Marketing'
+		WHEN dept_name IN ('Production', 'Quality Management') then 'Prod & QM'
+		WHEN dept_name IN ('Finance', 'Human Resources') then 'Finance & HR'
+		ELSE 'Customer Service'
+	END AS new_dept_name,
+	COUNT(*) AS employee_count
+FROM dept_emp 
+JOIN departments ON dept_emp.dept_no = departments.dept_no
+GROUP BY new_dept_name;
+
+-- v3 This version fix the problem of grouping the departments ********This version is correct************
+-- CHANGING THE END AS AFTER THE ELSE STATEMENT FIX THE PROBLEM
+--  TOO MANY changes see ALL comments
+-- *************************************************************************************
+-- This query groups the data by the new department names created by the CASE statement 
+-- and calculates the count of employees in each department.
+--  It then selects the new department name and the count of employees in each department.
+-- *************************************************************************************
+select
+-- 	( this paranthesis is not needed
+		-- select -- distinct (the distinct is NOT needed. Also once I removed the parenthesisies the select part was not needed.)
+				CASE
+					WHEN dept_name IN ('Research', 'Development') then 'R&D'
+					WHEN dept_name IN ('Sales', 'Marketing') then 'Sales & Marketing'
+					WHEN dept_name IN ('Production', 'Quality Management') then 'Prod & QM'
+					WHEN dept_name IN ('Finance', 'Human Resources') then 'Finance & HR'
+					ELSE 'Customer Service'
+				END as 'dept_group' -- The name was change from original 'new_dept_name to 'dept_group' to line with the group by
+-- 	) as dept_group  -- subquery (This line is not needed)
+    ,  round(avg(salary),2) as Avg_salary_per_dept -- the average was move to this location and its calculating the average of the groups.
+    -- AT THE END IT DOESN'T MATTER IF THE AVG STATEMETN IS PUT BEFORE OR AFTER THE "CASE" THE RESULT IT'S THE S A M E. 
+    -- ANOTHER PROBLEM WITH THIS IS THAT IT'S ONLY COUNTING THE INDIVIDUAL SALARY OF EMPLOYEES. (NOT SURE IF IT MAKES SENCE)
+from 
+	(
+		select de.emp_no, d.dept_name, s.salary
+		from dept_emp de -- calculates the count of employees in each department.
+		join departments d using(dept_no)
+		join salaries s using(emp_no)
+		where de.to_date > curdate()
+			AND s.to_date > curdate()
+	) as subq
+group by dept_group -- previously it was grouping by (dept_name) this whole time I should have been grouping by the CASE grouping. 
+; 
+
+-- v4 ******This version is correct************
+select round(avg(salary),2) as Avg_salary_per_dept, -- the average was move to this location and its calculating the average of the groups.
+	(
+		select distinct
+				CASE
+					WHEN dept_name IN ('Research', 'Development') then 'R&D'
+					WHEN dept_name IN ('Sales', 'Marketing') then 'Sales & Marketing'
+					WHEN dept_name IN ('Production', 'Quality Management') then 'Prod & QM'
+					WHEN dept_name IN ('Finance', 'Human Resources') then 'Finance & HR'
+					ELSE 'Customer Service'
+				END as 'new_dept_name'
+	) as MY_dept_group  -- subquery
+from 
+	(
+		select de.emp_no, d.dept_name, s.salary
+		from dept_emp de
+		join departments d using(dept_no)
+		join salaries s using(emp_no)
+		where de.to_date > curdate()
+			AND s.to_date > curdate()
+	) as subq
+group by MY_dept_group -- previously it was grouping by (dept_name) this whole time I should have been grouping by the CASE grouping. 
+; 
+
+-- v5 This version came from v3 after it was modified several times ******** This version is correct***********
+select
+	CASE
+		WHEN dept_name IN ('Research', 'Development') then 'R&D'
+		WHEN dept_name IN ('Sales', 'Marketing') then 'Sales & Marketing'
+		WHEN dept_name IN ('Production', 'Quality Management') then 'Prod & QM'
+		WHEN dept_name IN ('Finance', 'Human Resources') then 'Finance & HR'
+        ELSE 'Customer Service'
+	END as dept_group
+    , round(avg(salary), 2) as dept_avg_salary
+-- 		, round(avg(salary), 2) as dept_avg_salary
+-- 	, round(avg(salary), 2) as redone_avg_salary_line_to_fix_the_problem
+-- 	, round(avg(salary),2) as dept_avg_salary
+from
+-- 	(
+-- 		select de.emp_no, d.dept_name, s.salary
+-- from
+--  dept_emp de
+-- 		join departments d using(dept_no)
+-- 		join salaries s using(emp_no)
+departments
+join dept_emp using(dept_no)
+join salaries using(emp_no)
+-- 		where de.to_date > NOW()
+-- 			AND s.to_date > NOW()
+where salaries.to_date > now()
+AND dept_emp.to_date > now()
+-- 	) as subq
+group by dept_group
+;
+
+-- v5 This version came from v3 after it was modified several times *********** This version is correct************
+select
+	CASE
+		WHEN dept_name IN ('Research', 'Development') then 'R&D'
+		WHEN dept_name IN ('Sales', 'Marketing') then 'Sales & Marketing'
+		WHEN dept_name IN ('Production', 'Quality Management') then 'Prod & QM'
+		WHEN dept_name IN ('Finance', 'Human Resources') then 'Finance & HR'
+        ELSE 'Customer Service'
+	END as dept_group
+    , round(avg(salary), 2) as dept_avg_salary
+from
+departments
+join dept_emp using(dept_no)
+join salaries using(emp_no)
+where salaries.to_date > now()
+AND dept_emp.to_date > now()
+group by dept_group
+;
+
+-- v6 is correct
+select
+	case
+		when dept_name IN ('Research', 'Development') then 'R&D'
+        when dept_name IN ('Production', 'Marketing') then 'Sales & Marketing'
+        when dept_name IN ('Finance', 'Human Resources') then 'Finance & HR'
+        else 'Customer Service'
+	end as dept_group
+, round(avg(salary), 2) as my_dept_avg_salary
+from departments
+	join dept_emp using(dept_no)
+    join salaries using(emp_no)
+where salaries.to_date > NOW()
+	AND dept_emp.to_date > NOW()
+group by dept_group
+;
+
+-- ############################################################ Teacher's Correct ANS ########################################################################################################################
+-- #4 This example was wrong becuase "RESEARCH" WAS MISPELLED
 select -- dept_name, this was just to show the information as we were going 
 	Case
-		when dept_name IN ('Reaserch', 'Development') then 'R&D'
+		when dept_name IN ('Reaserch', 'Development') then 'R&D' -- Research was mispelled, so it was given me the wrong anwsers 
 		when dept_name IN ('Sales', 'Marketing') then 'Sales & Marketing'
 		when dept_name IN ('Production', 'Quality Management') then 'Prod & QM'
 		when dept_name IN ('Finance', 'Human Resources') then 'Finance & HR'
         ELSE dept_name
 	END as dept_group
-    , round(avg(salary), 2)
+    , round(avg(salary), 2) as dept_avg_salary
 --     , dept_emp.* -- shows everything (this was only to help follow where we were grabing the information
 --     , salaries.* -- shows everything (this was only to help follow where we were grabing the information
 from departments
@@ -241,10 +457,31 @@ where salaries.to_date > NOW()
 	AND dept_emp.to_date > now()
 group by dept_group
 ;
-
+select
+    round(avg(salary),2) -- order doesnt matter in the select statement
+	,
+    case 
+		when dept_name IN ('research','development') then 'R&D'
+        when dept_name IN ('sales','marketing') then 'Sales & Marketing'
+        when dept_name IN ('Production', 'Quality Management') then 'Prod & QM'
+        when dept_name IN ('Finance', 'human resources') then 'Finance & HR'
+        else dept_name
+	end as dept_group
+    -- , round(avg(salary),2)
+from departments
+	join dept_emp
+		using (dept_no)
+	join salaries
+		using (emp_no)
+where salaries.to_date > now()
+	and dept_emp.to_date > now()
+group by dept_group 
+;
 
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- #1 Write a query that returns all employees, their department number, 
+-- ############################################################ Teacher's Correct ANS ########################################################################################################################
+-- Another way of seeing problem # 1
+-- #### (#1) Write a query that returns all employees, their department number, 
 	-- their start date, their end date, 
 	-- and a new column 'is_current_employee' that is a 1 if the employee is still with the company and 0 if not.
 
@@ -280,7 +517,7 @@ from  dept_emp
 limit 11
 ;
 
--- Wilson's short method
+-- Wilson's short method (problem 1)
 select emp_no
 	, dept_no
     , hire_date
@@ -292,3 +529,17 @@ join employees
 where (emp_no, to_date) IN 
 	(select emp_no, max(to_date) from dept_emp group by emp_no)
     ;
+    
+-- Find all employees with first names 'Irena', 'Vidya', or 'Maya', and order your results returned by last name and then first name. 
+select distinct first_name
+from employees
+where first_name = 'Irena'
+	OR first_name = 'Vidya'
+    OR first_name = 'Maya'
+;
+
+select *
+from employees
+where first_name IN ('Irena', 'Vidya', 'Maya')
+	AND emp_no = 10200
+;
