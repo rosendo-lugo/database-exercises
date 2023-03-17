@@ -439,7 +439,7 @@ where salary >(select max(salary) - round(stddev(salary), 2)
 				from salaries s
 				where s.to_date > curdate())
 and to_date > curdate())
-/
+/ -- divide
 (-- denamenator; total salary
 select count(*) from salaries 
 where  to_date > curdate())*100, 2) as prctmaxstddev
