@@ -346,7 +346,7 @@ from
 group by dept_group -- previously it was grouping by (dept_name) this whole time I should have been grouping by the CASE grouping. 
 ; 
 
--- v4 ******This version is correct************
+-- v4 ******My correct correct version************
 select round(avg(salary),2) as Avg_salary_per_dept, -- the average was move to this location and its calculating the average of the groups.
 	(
 		select distinct

@@ -447,7 +447,9 @@ where  to_date > curdate())*100, 2) as prctmaxstddev
 
 
 -- Hint You will likely use multiple subqueries in a variety of ways
--- Hint It's a good practice to write out all of the small queries that you can. Add a comment above the query showing the number of rows returned. You will use this number (or the query that produced it) in other, larger queries.
+-- Hint It's a good practice to write out all of the small queries that you can. 
+-- Add a comment above the query showing the number of rows returned. 
+-- You will use this number (or the query that produced it) in other, larger queries.
 
 -- BONUS
 
