@@ -25,6 +25,8 @@ select *
 from customer
 ;
 
+
+
 -- total active # 584
 select count(*)
 from customer
@@ -57,3 +59,36 @@ select active, count(*)
 from customer
 group by active
 ;
+
+
+-- *******20 Mar 2023***********
+
+-- in the the sakila database,
+-- use the actor, film_actor, and film table
+-- find all movies that "Zero Cage" has been in
+-- and make a new colum that says if the moved 
+-- is rate R or not
+
+show databases;
+use sakila;
+show tables;
+select * from actor; -- actor_id, name 
+SELECT * FROM film_actor; -- actor_id, film_id
+select * from film; -- film_id, title, rating
+
+select *
+from actor
+	join film_actor
+where first_name like ('Zero')
+	AND last_name like ('Cage')
+;
+
+
+
+
+
+
+
+;
+
+
