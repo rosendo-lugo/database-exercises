@@ -83,12 +83,68 @@ where first_name like ('Zero')
 	AND last_name like ('Cage')
 ;
 
+-- -----27 Mar-------
+-- SQL WARMUP:
+-- Find all employees who are current managers and make more than one standard deviation over the companies salary average.
+show databases;
+use employees;
+show tables;
 
+SELECT * FROM employees;
+SELECT * FROM dept_manager;
+SELECT * FROM dept_emp;
+SELECT * FROM salaries;
 
-
-
-
-
+select emp_no, round(std(salary),1), round(stddev(salary),1), count(*)
+from dept_manager dm
+join salaries s using(emp_no)
+where dm.to_date > curdate()
+group by emp_no
 ;
+
+
+-- correct ans
+select e.first_name, e.last_name, s.salary
+from employees e
+join salaries s using(emp_no)
+where e.emp_no in (select emp_no from dept_manager where to_date > curdate())
+	and s.to_date > curdate()
+    
+    and s.salary > (select avg(salary) + std(salary)from salaries)
+;
+
+
+-- --------28 Mar---------------
+use telco_churn;
+SELECT * FROM telco_churn.customer_payments;
+SELECT * FROM telco_churn.customers;
+
+# Using the telco_churn DB, give me all the customers who pay over the company monthly average
+
+select count(customer_id)
+from customers
+where monthly_charges > (select avg(monthly_charges) from customers)
+;
+
+
+-- where e.emp_no in (select emp_no from dept_manager where to_date > curdate())
+-- 	and s.to_date > curdate()
+--     and s.salary > (select avg(salary) + std(salary)from salaries)
+
+select count(customer_id)/(select count(customer_id)
+							from customers) * 100
+from customers
+where monthly_charges < (select avg(monthly_charges) from customers)
+;
+
+
+select count(customer_id)
+from customers
+where monthly_charges < (select avg(monthly_charges) from customers)
+;
+
+
+
+
 
 
